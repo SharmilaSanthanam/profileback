@@ -21,7 +21,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 const jwt = require("jsonwebtoken");
-var nodemailer = require("nodemailer");
+// var nodemailer = require("nodemailer");
 
 const JWT_SECRET =
   "hvdvay6ert72839289()aiyg8t87qt72393293883uhefiuh78ttq3ifi78272jbkj?[]]pou89ywe";
@@ -98,28 +98,59 @@ app.post("/userData", async (req, res) => {
   } catch (error) {}
 });
 
-app.put("/updateUser/:id", async (req, res) => {
-  const { id, name, email } = req.params;
+app.get("/getAllUser", async (req, res) => {
   try {
-    User.findByIdAndUpdate( {
-      _id: id,
-    },
-    {
-      $set: {
-        name: name,
-        email: email,
-      },
-    }, 
-    function (err, res) {
-      console.log(err);
-    });
-    res.send({ status: "Ok", data: "Updated" });
+    const allUser = await User.find({});
+    res.send({ status: "ok", data: allUser });
   } catch (error) {
     console.log(error);
   }
 });
 
+//get a user
+app.get("/:id", async (req, res) => {
+  const {id} = req.params;
+  try {
+    const user = await User.findById(id);
+     
+    res.send({ status: "ok", data: user });
+   
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+app.post("/deleteUser", async (req, res) => {
+  const { userid } = req.body;
+  try {
+    User.deleteOne({ _id: userid }, function (err, res) {
+      console.log(err);
+    });
+    res.send({ status: "Ok", data: "Deleted" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.put("/:id", async (req, res) => {
+  const {id} = req.params;
+ 
+  try {
+    const {name, email} = req.body;
+    const user = await User.findByIdAndUpdate(id, {name, email});
+await user.save();
+   
+    res.send({ status: "Ok", data: user });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// app.get('/logout',(req,res) => {
+//   req.session.destroy();
+//   res.redirect('/');
+// });
+
 app.listen(PORT, ()=>{
   console.log('listening to', PORT)
   });
-
